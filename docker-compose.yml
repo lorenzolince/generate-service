@@ -1,0 +1,47 @@
+version: '3.2'
+services:
+  generate-service-deploy:
+    image: lorenzolince/generate-service-deploy
+    container_name: generate-service-deploy
+    hostname: generate-service-deploy
+    restart: always
+    ports:
+     - "8092:8080"
+     - "8082:8082"
+     - "8084:8084"
+    volumes:
+    - /app/service
+    environment:
+    - DOMAIN_SERVICE=${LOCAL_IP}
+  generate-service-rest:
+    image: lorenzolince/generate-service-rest
+    container_name: generate-service-rest
+    hostname: generate-service-rest
+    restart: always
+    ports:
+      - "8090:8090"
+    volumes_from:
+      - generate-service-deploy:rw
+    volumes:
+    - ./data:/app/data
+    links:
+     - generate-service-deploy 
+    environment:
+    - API_ENDPOINT_RECEPTION=http://${EXTERNA_DNS}
+  generate-service-ui:
+    image: lorenzolince/generate-service-ui
+    container_name: generate-service-ui
+    hostname: generate-service-ui
+    restart: always
+    ports:
+     - "3000:3000"
+    environment:
+    - NODE_ENV=test
+    - PORT=3000
+    - DOMAIN_SERVICE=${LOCAL_IP}:8090
+    links:
+     - generate-service-rest
+    depends_on:
+     - generate-service-rest
+    
+    

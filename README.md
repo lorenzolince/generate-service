@@ -1,0 +1,5 @@
+# generate-service
+Tool to generate Rest and SOAP services from a stored procedure structure, function or package of an ORACLE or SqlServer database
+**ENVIRONMENT**
+1- LOCAL_IP: add host server ip
+2- EXTERNA_DNS: add domain or DNS name of the receiving server, this does not apply to demos
