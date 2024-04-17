@@ -27,7 +27,8 @@ services:
     links:
      - generate-service-deploy 
     environment:
-    - API_ENDPOINT_RECEPTION=http://${EXTERNA_DNS}
+    - API_ENDPOINT_RECEPTION=${EXTERNAL_DNS}
+    - URL_REPOSITORY=${URL_REPOSITORY}
   generate-service-ui:
     image: lorenzolince/generate-service-ui
     container_name: generate-service-ui
