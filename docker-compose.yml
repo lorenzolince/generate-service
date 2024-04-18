@@ -20,7 +20,7 @@ services:
     hostname: generate-service-rest
     restart: always
     ports:
-      - "8090:8090"
+      - "${PORT_API_REST}:8090"
     volumes_from:
       - generate-service-deploy:rw
     volumes:
@@ -40,7 +40,8 @@ services:
     environment:
     - NODE_ENV=test
     - PORT=3000
-    - DOMAIN_SERVICE=${LOCAL_IP}:8090
+    - DOMAIN_SERVICE=${LOCAL_IP}
+    - PORT_API_REST=${PORT_API_REST}
     links:
      - generate-service-rest
     depends_on:
