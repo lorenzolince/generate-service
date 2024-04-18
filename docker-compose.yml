@@ -6,13 +6,14 @@ services:
     hostname: generate-service-deploy
     restart: always
     ports:
-     - "8092:8080"
-     - "8082:8082"
-     - "8084:8084"
+     - "${PORT_TEST_SOA}:${PORT_TEST_SOA}"
+     - "${PORT_TEST_REST}:${PORT_TEST_REST}"
     volumes:
     - /app/service
     environment:
     - DOMAIN_SERVICE=${LOCAL_IP}
+    - PORT_TEST_SOA=${PORT_TEST_SOA}
+    - PORT_TEST_REST=${PORT_TEST_REST}
   generate-service-rest:
     image: lorenzolince/generate-service-rest
     container_name: generate-service-rest
