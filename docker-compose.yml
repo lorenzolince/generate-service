@@ -8,12 +8,14 @@ services:
     ports:
      - "${PORT_TEST_SOA}:${PORT_TEST_SOA}"
      - "${PORT_TEST_REST}:${PORT_TEST_REST}"
+     - "${PORT_TEST_GRAPHQL}:${PORT_TEST_GRAPHQL}"
     volumes:
     - /app/service
     environment:
     - DOMAIN_SERVICE=${LOCAL_IP}
     - PORT_TEST_SOA=${PORT_TEST_SOA}
     - PORT_TEST_REST=${PORT_TEST_REST}
+    - PORT_TEST_GRAPHQL=${PORT_TEST_GRAPHQL}
   generate-service-rest:
     image: lorenzolince/generate-service-rest
     container_name: generate-service-rest
@@ -41,6 +43,7 @@ services:
     - NODE_ENV=test
     - PORT=3000
     - DOMAIN_SERVICE=${LOCAL_IP}
+    - API_ENDPOINT=http://generate-service-rest:8090
     - PORT_API_REST=${PORT_API_REST}
     links:
      - generate-service-rest
