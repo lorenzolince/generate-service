@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+    parameters {
+        string(name: 'projectName', defaultValue: 'projectName', description: 'project name')
+        string(name: 'project', defaultValue: 'project', description: 'project contest')
+        string(name: 'voumenPath', defaultValue: '/home/lorenzolince/docker/jenkins/jenkins_home/workspace/genereic_service', description: 'path volumes')
+    }
+    environment {
+        PROJECTNAME = "${params.projectName}"
+            PROJECT = "${params.project}"
+            VOUMENPATH = "${params.voumenPath}"
+            URL_RECEPTION = "http://localhost:8091"
+            URL_DB = "jdbc:oracle:thin:@localhost:1521:xe"
+    }
+
+    stages {
+        stage('Generate Service') {
+            steps {
+                echo "PROJECT:  ${env.PROJECTNAME}"
+                sh "rm -rf *"
+                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
+            }
+        }
+        stage("Construct DokerFile") {
+            steps {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'db-credentials-dev', usernameVariable: 'USER_DB', passwordVariable: 'PASS_DB']]) {
+                    sh "pwd"
+                    sh "ls -la "
+                    sh "cat > Dockerfile << EOF\n" +
+                    "FROM openjdk:18-jdk-alpine3.14 \n" +
+                    "MAINTAINER Lorenzo Lince<lorenzolince@gmail.com>\n" +
+                    "\n" +
+                    "RUN apk add --update netcat-openbsd && rm -rf /var/cache/apk/*\n" +
+                    "RUN apk add --no-cache cifs-utils\n" +
+                    "RUN mkdir -p /app/\n" +
+                    "COPY *.jar /app/app.jar\n" +
+                    "RUN echo \"/bin/sh -c \" > entrypoint.sh\n" +
+                    "RUN echo \"java \\\$API_JAVA_OPTION -jar /app/app.jar \" >> entrypoint.sh\n" +
+                    "RUN adduser -s /bin/true -u 1000 -D -h /app app \\ \n" +
+                    "  && chown -R app /app \\ \n" +
+                    "  && chown -R app /app \\ \n" +
+                    "  && chmod 700 /app \\ \n" +
+                    "  && chown -R app /app/app.jar \\ \n" +
+                    "  && chmod 700 /app/app.jar \\ \n" +
+                    "  && chmod 755 entrypoint.sh\n" +
+                    "USER app\n" +
+                    "ENV DB_DRIVER=oracle.jdbc.OracleDriver\n" +
+                    "ENV DB_URL=${env.URL_DB}\n" +
+                    "ENV DB_USER_NAME=${USER_DB}\n" +
+                    "ENV DB_PASSWORD=${PASS_DB}\n" +
+                    "ENV VALID_LICENSE=`cat license.txt`\n" +
+                    "RUN cat entrypoint.sh\n" +
+                    "EXPOSE 8080 8789\n" +
+                    "CMD /bin/sh ./entrypoint.sh\n" +
+                    "EOF"
+                }
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                sh "docker build --tag=${env.PROJECTNAME} ."
+                sh "rm -rf * "
+            }
+        }
+        stage('Docker run') {
+            steps {
+                sh "docker run -d -p 8087:8080 --name ${env.PROJECTNAME} ${env.PROJECTNAME}"
+            }
+        }
+    }
+}
