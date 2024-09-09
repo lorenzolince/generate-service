@@ -3,13 +3,13 @@ pipeline {
     parameters {
         string(name: 'projectName', defaultValue: 'projectName', description: 'project name')
         string(name: 'project', defaultValue: 'project', description: 'project contest')
-        string(name: 'voumenPath', defaultValue: '/home/lorenzolince/docker/jenkins/jenkins_home/workspace/genereic_service', description: 'path volumes')
+        string(name: 'URL_RECEPTION', defaultValue: 'http://localhost:8091', description: 'URL_RECEPTION')
     }
     environment {
-        PROJECTNAME = "${params.projectName}"
+            PROJECTNAME = "${params.projectName}"
             PROJECT = "${params.project}"
-            VOUMENPATH = "${params.voumenPath}"
-            URL_RECEPTION = "http://localhost:8091"
+            VOUMENPATH = "/home/lorenzolince/docker/jenkins/jenkins_home/workspace/genereic_service"
+            URL_RECEPTION = "${params.URL_RECEPTION}"
             URL_DB = "jdbc:oracle:thin:@localhost:1521:xe"
     }
 
@@ -17,6 +17,7 @@ pipeline {
         stage('Generate Service') {
             steps {
                 echo "PROJECT:  ${env.PROJECTNAME}"
+                echo "URL_RECEPTION:  ${env.URL_RECEPTION}"
                 sh "rm -rf *"
                 sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
             }
@@ -56,15 +57,16 @@ pipeline {
                 }
             }
         }
-        stage('Docker Build') {
+       stage('Docker Build') {
             steps {
-                sh "docker build --tag=${env.PROJECTNAME} ."
+                sh "ls -l"
+                sh "docker build --tag=${env.PROJECTNAME} . "
                 sh "rm -rf * "
             }
         }
         stage('Docker run') {
             steps {
-                sh "docker run -d -p 8087:8080 --name ${env.PROJECTNAME} ${env.PROJECTNAME}"
+                sh "docker run -d -p 8087:8080 --name ${env.PROJECTNAME} ${env.PROJECTNAME} "
             }
         }
     }
