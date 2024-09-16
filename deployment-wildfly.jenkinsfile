@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+    parameters {
+        string(name: 'projectName', defaultValue: 'projectName', description: 'project name')
+        string(name: 'project', defaultValue: 'project', description: 'project contest')
+        string(name: 'URL_RECEPTION', defaultValue: 'http://127.0.0.1:8091', description: 'URL_RECEPTION')
+    }
+    environment {
+            PROJECTNAME = "${params.projectName}"
+            PROJECT = "${params.project}"
+            VOUMENPATH = "$HOME/wildfly/deployments"
+            URL_RECEPTION = "${params.URL_RECEPTION}"
+    }
+
+    stages {
+        stage('deployment Service') {
+            steps {
+                echo "PROJECT:  ${env.PROJECTNAME}"
+                echo "URL_RECEPTION:  ${env.URL_RECEPTION}"
+                sh "rm -rf *"
+                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
+            }
+        }  
+     
+    }
+}
