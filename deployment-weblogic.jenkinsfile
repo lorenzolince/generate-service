@@ -1,0 +1,98 @@
+pipeline {
+    agent any
+    parameters {
+        string(name: 'projectName', defaultValue: 'projectName', description: 'project name')
+        string(name: 'project', defaultValue: 'project', description: 'project contest')
+        string(name: 'URL_RECEPTION', defaultValue: 'http://127.0.0.1:8091', description: 'URL_RECEPTION')
+    }
+    environment {
+        PROJECTNAME = "${params.projectName}"
+            PROJECT = "${params.project}"
+            VOUMENPATH = "/home/lorenzolince/docker/jenkins/jenkins_home/workspace/deployment-weblogic"
+            URL_RECEPTION = "${params.URL_RECEPTION}"
+            WEBLOGIC_HOST = "127.0.0.1"
+            WEBLOGIC_PORT = "7001"
+    }
+
+    stages {
+        stage('Generate Service') {
+            steps {
+                echo "PROJECT:  ${env.PROJECTNAME}"
+                echo "URL_RECEPTION:  ${env.URL_RECEPTION}"
+                sh "rm -rf *"
+                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
+            }
+        }
+        stage("Construct pom") {
+            steps {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'weblogic-credentials', usernameVariable: 'USER_SERVER', passwordVariable: 'PASS_SERVER']]) {
+                    sh "cat > pom.xml << EOF\n" +
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                    "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
+                    "    <modelVersion>4.0.0</modelVersion>\n" +
+                    "    <groupId>com.test.app</groupId>\n" +
+                    "    <artifactId>${env.PROJECTNAME}</artifactId>\n" +
+                    "    <version>0.0.1-SNAPSHOT</version>\n" +
+                    "    <packaging>war</packaging>\n" +
+                    "    <parent>\n" +
+                    "        <groupId>org.springframework.boot</groupId>\n" +
+                    "        <artifactId>spring-boot-starter-parent</artifactId>\n" +
+                    "        <version>2.7.18</version>\n" +
+                    "        <relativePath/> \n" +
+                    "    </parent>\n" +
+                    "    <properties>\n" +
+                    "		 <maven.build.skip>true</maven.build.skip>\n" +
+                    "    </properties>\n" +
+                    "    <build>\n" +
+                    "        <finalName>\\\${project.name}</finalName>\n" +
+                    "        <plugins>\n" +
+                    "        <plugin>\n" +
+                    "            <artifactId>maven-war-plugin</artifactId>\n" +
+                    "            <configuration>\n" +
+                    "                <skip>true</skip>\n" +
+                    "            </configuration>\n" +
+                    "        </plugin>\n" +
+                    "        <plugin>\n" +
+                    "                <groupId>com.oracle.weblogic</groupId>\n" +
+                    "                <artifactId>weblogic-maven-plugin</artifactId>\n" +
+                    "                <version>12.2.1-4-0</version>\n" +
+                    "                <configuration>\n" +
+                    "                    <domain>llince</domain> <!-- Nombre del dominio de WebLogic -->\n" +
+                    "                    <user>${USER_SERVER}</user> <!-- Usuario de WebLogic -->\n" +
+                    "                    <password>${PASS_SERVER}</password> <!-- Contraseña -->\n" +
+                    "                    <adminurl>t3://${env.WEBLOGIC_HOST}:${env.WEBLOGIC_PORT}</adminurl> <!-- URL del servidor WebLogic -->\n" +
+                    "                    <targets>AdminServer</targets> <!-- Servidor de destino -->\n" +
+                    "                    <source>\\\${project.build.directory}/\\\${project.build.finalName}.\\\${project.packaging}</source>\n" +
+                    "                    <verbose>true</verbose>\n" +
+                    "                    <name>\\\${project.build.finalName}</name>\n" +
+                    "                    <debug>true</debug>\n" +
+                    "                    <remote>true</remote>\n" +
+                    "                    <upload>true</upload>\n" +
+                    "                </configuration>\n" +
+                    "                <executions> \n" +
+                    "                    <execution> \n" +
+                    "                        <phase>install</phase> \n" +
+                    "                        <goals> \n" +
+                    "                            <goal>redeploy</goal> \n" +
+                    "                        </goals> \n" +
+                    "                    </execution> \n" +
+                    "                </executions> \n" +
+                    "            </plugin>\n" +
+                    "        </plugins>\n" +
+                    "    </build>\n" +
+                    "</project>"
+                    sh "mkdir target"
+                    sh "mv ${env.PROJECTNAME}.war target/"
+                }
+
+            }
+        }
+        stage("Deploy weblogic") {
+            steps {
+                sh "mvn -Dfile.encoding=UTF-8 weblogic:redeploy"
+                sh "rm -rf *"
+            }
+        }
+    }
+}
