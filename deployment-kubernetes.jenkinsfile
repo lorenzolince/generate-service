@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+    parameters {
+        string(name: 'projectName', defaultValue: '', description: 'project name')
+        string(name: 'project', defaultValue: '', description: 'project contest')
+        string(name: 'URL_RECEPTION', defaultValue: '', description: 'URL_RECEPTION')
+        string(name: 'DATABASE', defaultValue: '', description: 'DATABASE')
+    }
+    environment {
+        PROJECTNAME = "${params.projectName}"
+            PROJECT = "${params.project}"
+            VOUMENPATH = "${HOME}/jenkins/jenkins_home/workspace/deployment_kubernetes"
+            URL_RECEPTION = "${params.URL_RECEPTION}"
+            DATABASE = "${params.DATABASE}"
+    }
+
+    stages {
+        stage('Generate Service') {
+            steps {
+                echo "PROJECT:  ${env.PROJECTNAME}"
+                echo "URL_RECEPTION:  ${env.URL_RECEPTION}"
+                sh "rm -rf *.jar"
+                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                sh "ls -l"
+                sh "docker build --tag=registry.lopa.com/${env.PROJECTNAME} . "
+                sh "rm -rf *.jar"
+            }
+        }
+        stage('Docker publish') {
+            steps {
+                sh "docker push registry.lopa.com/${env.PROJECTNAME}"
+            }
+        }
+        stage('Deployd Kubernetes') {
+            steps {
+                script {
+                    if (env.DATABASE == 'ORACLE') {
+                        sh "helm upgrade --namespace generic --install --values genericDeploy/helmcharts/genericservice/development_values.yaml --set genericservice=${env.PROJECTNAME},image.repository=registry.lopa.com/${env.PROJECTNAME},dabadaseSecretName=database-ora,ingress.hosts[0].host=${env.PROJECTNAME}.genericservice.com --wait ${env.PROJECTNAME} genericDeploy/helmcharts/genericservice"
+                    } else {
+                        sh "helm upgrade --namespace generic --install --values genericDeploy/helmcharts/genericservice/development_values.yaml --set genericservice=${env.PROJECTNAME},image.repository=registry.lopa.com/${env.PROJECTNAME},dabadaseSecretName=database-sql,ingress.hosts[0].host=${env.PROJECTNAME}.genericservice.com --wait ${env.PROJECTNAME} genericDeploy/helmcharts/genericservice"
+                    }
+                }
+            }
+        }
+    }
+}
