@@ -1,17 +1,18 @@
 pipeline {
     agent any
     parameters {
-        string(name: 'projectName', defaultValue: '', description: 'project name')
-        string(name: 'project', defaultValue: '', description: 'project contest')
+        string(name: 'projectName', defaultValue: 'projectName', description: 'project name')
+        string(name: 'project', defaultValue: 'project', description: 'project contest')
         string(name: 'URL_RECEPTION', defaultValue: '', description: 'URL_RECEPTION')
-        string(name: 'DATABASE', defaultValue: '', description: 'DATABASE')
+        string(name: 'DATABASE', defaultValue: 'ORACLE', description: 'DATABASE')
     }
     environment {
         PROJECTNAME = "${params.projectName}"
             PROJECT = "${params.project}"
-            VOUMENPATH = "${HOME}/jenkins/jenkins_home/workspace/deployment_kubernetes"
+            VOUMENPATH = "${home}/jenkins_home/workspace/deployment_kubernetes"
             URL_RECEPTION = "${params.URL_RECEPTION}"
             DATABASE = "${params.DATABASE}"
+            TOKEN_APP = "MIIBI"
     }
 
     stages {
@@ -20,19 +21,19 @@ pipeline {
                 echo "PROJECT:  ${env.PROJECTNAME}"
                 echo "URL_RECEPTION:  ${env.URL_RECEPTION}"
                 sh "rm -rf *.jar"
-                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
+                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'DATABASE=${env.DATABASE}' -e 'TOKEN_APP=${env.TOKEN_APP}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
             }
         }
         stage('Docker Build') {
             steps {
                 sh "ls -l"
-                sh "docker build --tag=registry.lopa.com/${env.PROJECTNAME} . "
+                sh "docker build --tag=registry.my.com/${env.PROJECTNAME} . "
                 sh "rm -rf *.jar"
             }
         }
         stage('Docker publish') {
             steps {
-                sh "docker push registry.lopa.com/${env.PROJECTNAME}"
+                sh "docker push registry.my.com/${env.PROJECTNAME}"
             }
         }
         stage('Deployd Kubernetes') {

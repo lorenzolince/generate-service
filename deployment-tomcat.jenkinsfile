@@ -9,10 +9,9 @@ pipeline {
     environment {
         PROJECTNAME = "${params.projectName}"
             PROJECT = "${params.project}"
-            VOUMENPATH = "${home}/jenkins_home/workspace/deployment-wildfly"
+            VOUMENPATH = "${home}/jenkins_home/workspace/deployment-tomcat"
             URL_RECEPTION = "${params.URL_RECEPTION}"
-            WILDFLY_HOST = "127.0.0.1"
-            WILDFLY_PORT = "9990"
+            TOMCAT_URL = "http://127.0.0.1:8080/manager/text"
             DATABASE = "${params.DATABASE}"
             TOKEN_APP = "MIIBI"
     }
@@ -28,7 +27,7 @@ pipeline {
         }
         stage("Construct pom") {
             steps {
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'wildfly-credentials', usernameVariable: 'USER_SERVER', passwordVariable: 'PASS_SERVER']]) {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'tomcat-credentials', usernameVariable: 'USER_SERVER', passwordVariable: 'PASS_SERVER']]) {
                     sh "cat > pom.xml << EOF\n" +
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
@@ -57,23 +56,16 @@ pipeline {
                     "                </configuration>\n" +
                     "            </plugin> \n" +
                     "            <plugin>\n" +
-                    "                <groupId>org.wildfly.plugins</groupId>\n" +
-                    "                <artifactId>wildfly-maven-plugin</artifactId>\n" +
-                    "                <version>5.0.1.Final</version>\n" +
+                    "                <groupId>org.apache.tomcat.maven</groupId>\n" +
+                    "                <artifactId>tomcat7-maven-plugin</artifactId>\n" +
+                    "                <version>2.2</version>\n" +
                     "                <configuration>\n" +
-                    "                    <hostname>${env.WILDFLY_HOST}</hostname>\n" +
-                    "                    <port>${env.WILDFLY_PORT}</port>\n" +
+                    "                    <url>${env.TOMCAT_URL}</url>\n" +
                     "                    <username>${USER_SERVER}</username>\n" +
                     "                    <password>${PASS_SERVER}</password>\n" +
-                    "                    <filename>\\\${project.name}.war</filename>\n" +
+                    "                    <path>/\\\${project.name}</path>\n" +
+					"                    <update>true</update>\n" +
                     "                </configuration>\n" +
-                    "                <executions>\n" +
-                    "                    <execution>\n" +
-                    "                        <goals>\n" +
-                    "                            <goal>deploy</goal>\n" +
-                    "                        </goals>\n" +
-                    "                    </execution>\n" +
-                    "                </executions>\n" +
                     "            </plugin>\n" +
                     "        </plugins>\n" +
                     "    </build>\n" +
@@ -83,9 +75,9 @@ pipeline {
                 sh "mv ${env.PROJECTNAME}.war target/"
             }
         }
-        stage("Deploy Wildfly") {
+        stage("Deploy Tomcat") {
             steps {
-                sh "mvn wildfly:deploy"
+                sh "mvn tomcat7:deploy"
                 sh "rm -rf *"
             }
         }

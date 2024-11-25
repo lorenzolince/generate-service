@@ -9,10 +9,10 @@ pipeline {
     environment {
         PROJECTNAME = "${params.projectName}"
             PROJECT = "${params.project}"
-            VOUMENPATH = "${HOME}/jenkins/jenkins_home/workspace/deployment_docker"
+            VOUMENPATH = "${home}/jenkins_home/workspace/deployment_docker"
             URL_RECEPTION = "${params.URL_RECEPTION}"
             DATABASE = "${params.DATABASE}"
-            LICENCE = ""
+            TOKEN_APP = "MIIBI"
     }
 
     stages {
@@ -23,7 +23,7 @@ pipeline {
                 echo "URL_RECEPTION:  ${env.URL_RECEPTION}"
                 echo "DATABASE:  ${env.DATABASE}"
                 sh "rm -rf *"
-                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
+                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'DATABASE=${env.DATABASE}' -e 'TOKEN_APP=${env.TOKEN_APP}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
             }
         }
         stage("Construct DokerFile") {
@@ -55,7 +55,7 @@ pipeline {
                             "ENV DB_URL=jdbc:oracle:thin:@127.0.0.1:1521:xe\n" +
                             "ENV DB_USER_NAME=${USER_DB}\n" +
                             "ENV DB_PASSWORD=${PASS_DB}\n" +
-                            "ENV VALID_LICENSE=${env.LICENCE}\n" +
+                            "ENV VALID_LICENSE=${env.TOKEN_APP}\n" +
                             "RUN cat entrypoint.sh\n" +
                             "EXPOSE 8080 8789\n" +
                             "CMD /bin/sh ./entrypoint.sh\n" +
@@ -84,10 +84,10 @@ pipeline {
                             "  && chmod 755 entrypoint.sh\n" +
                             "USER app\n" +
                             "ENV DB_DRIVER=com.microsoft.sqlserver.jdbc.SQLServerDriver\n" +
-                            "ENV DB_URL=jdbc:sqlserver://127.0.0.1;databaseName=ACA_OPERATIONSERVICE_DEV\n" +
+                            "ENV DB_URL=jdbc:sqlserver://127.0.0.1;databaseName=DATA_DEV\n" +
                             "ENV DB_USER_NAME=${USER_DB}\n" +
                             "ENV DB_PASSWORD=${PASS_DB}\n" +
-                            "ENV VALID_LICENSE=${env.LICENCE}\n" +
+                            "ENV VALID_LICENSE=${env.TOKEN_APP}\n" +
                             "RUN cat entrypoint.sh\n" +
                             "EXPOSE 8080 8789\n" +
                             "CMD /bin/sh ./entrypoint.sh\n" +
