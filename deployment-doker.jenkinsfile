@@ -5,14 +5,16 @@ pipeline {
         string(name: 'project', defaultValue: '', description: 'project contest')
         string(name: 'URL_RECEPTION', defaultValue: '', description: 'URL_RECEPTION')
         string(name: 'DATABASE', defaultValue: '', description: 'DATABASE')
+        string(name: 'DOCKER_PORT', defaultValue: '', description: 'DOCKER_PORT')
     }
     environment {
         PROJECTNAME = "${params.projectName}"
             PROJECT = "${params.project}"
-            VOUMENPATH = "${home}/jenkins_home/workspace/deployment_docker"
-            URL_RECEPTION = "${params.URL_RECEPTION}"
+            VOUMENPATH = "${home}/jenkins/jenkins_home/workspace/deployment_docker"
+            URL_RECEPTION = "https://generateservice.lincetechnology.net"
             DATABASE = "${params.DATABASE}"
-            TOKEN_APP = "MIIBI"
+            DOCKER_PORT = "${params.DOCKER_PORT}"
+            TOKEN_APP = "MIIBI2NjMyOTQ4NDY5"
     }
 
     stages {
@@ -23,75 +25,37 @@ pipeline {
                 echo "URL_RECEPTION:  ${env.URL_RECEPTION}"
                 echo "DATABASE:  ${env.DATABASE}"
                 sh "rm -rf *"
-                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'DATABASE=${env.DATABASE}' -e 'TOKEN_APP=${env.TOKEN_APP}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
+                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'TOKEN_APP=${env.TOKEN_APP}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
             }
         }
-        stage("Construct DokerFile") {
+        stage("Set env") {
             steps {
                 script {
                     if (env.DATABASE == 'ORACLE') {
                         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'db-credentials-dev', usernameVariable: 'USER_DB', passwordVariable: 'PASS_DB']]) {
-                            sh "pwd"
-                            sh "ls -la "
-                            sh "cat > Dockerfile << EOF\n" +
-                            "FROM openjdk:18-jdk-alpine3.14 \n" +
-                            "MAINTAINER Lorenzo Lince<lorenzolince@gmail.com>\n" +
-                            "\n" +
-                            "RUN apk add --update netcat-openbsd && rm -rf /var/cache/apk/*\n" +
-                            "RUN apk add --no-cache cifs-utils\n" +
-                            "RUN mkdir -p /app/\n" +
-                            "COPY *.jar /app/app.jar\n" +
-                            "RUN echo \"/bin/sh -c \" > entrypoint.sh\n" +
-                            "RUN echo \"java \\\$API_JAVA_OPTION -jar /app/app.jar \" >> entrypoint.sh\n" +
-                            "RUN adduser -s /bin/true -u 1000 -D -h /app app \\ \n" +
-                            "  && chown -R app /app \\ \n" +
-                            "  && chown -R app /app \\ \n" +
-                            "  && chmod 700 /app \\ \n" +
-                            "  && chown -R app /app/app.jar \\ \n" +
-                            "  && chmod 700 /app/app.jar \\ \n" +
-                            "  && chmod 755 entrypoint.sh\n" +
-                            "USER app\n" +
-                            "ENV DB_DRIVER=oracle.jdbc.OracleDriver\n" +
-                            "ENV DB_URL=jdbc:oracle:thin:@127.0.0.1:1521:xe\n" +
-                            "ENV DB_USER_NAME=${USER_DB}\n" +
-                            "ENV DB_PASSWORD=${PASS_DB}\n" +
-                            "ENV VALID_LICENSE=${env.TOKEN_APP}\n" +
-                            "RUN cat entrypoint.sh\n" +
-                            "EXPOSE 8080 8789\n" +
-                            "CMD /bin/sh ./entrypoint.sh\n" +
-                            "EOF"
+                            dir("${env.PROJECTNAME}/") {
+                                sh "pwd"
+                                sh "ls -la "
+                                sh "sed -i \"s/^GRAPHQL_SPQR_GUI_ENABLED=.*/GRAPHQL_SPQR_GUI_ENABLED=true/\" \".env\""
+                                sh "sed -i \"s/^SWAGGER_UI=.*/SWAGGER_UI=true/\" \".env\""
+                                sh "sed -i \"s/^DB_USER_NAME=.*/DB_USER_NAME=${USER_DB}/\" \".env\""
+                                sh "sed -i \"s/^DB_PASSWORD=.*/DB_PASSWORD=${PASS_DB}/\" \".env\""
+                                sh "sed -i \"s|^VALID_LICENSE=.*|VALID_LICENSE='${env.TOKEN_APP}'|\" .env"
+                                sh "sed -i '0,/- \"8080:/{s/- \"8080:/- \"${env.DOCKER_PORT}:/}' docker-compose.yml"
+                            }
                         }
                     } else {
                         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'db-credential-sqlserver', usernameVariable: 'USER_DB', passwordVariable: 'PASS_DB']]) {
-                            sh "pwd"
-                            sh "ls -la "
-                            sh "cat > Dockerfile << EOF\n" +
-                            "FROM openjdk:18-jdk-alpine3.14 \n" +
-                            "MAINTAINER Lorenzo Lince<lorenzolince@gmail.com>\n" +
-                            "\n" +
-                            "RUN apk add --update netcat-openbsd && rm -rf /var/cache/apk/*\n" +
-                            "RUN apk add --no-cache cifs-utils\n" +
-                            "RUN mkdir -p /app/\n" +
-                            "COPY *.jar /app/app.jar\n" +
-                            "RUN echo \"/bin/sh -c \" > entrypoint.sh\n" +
-                            "RUN echo \"java \\\$API_JAVA_OPTION -jar /app/app.jar \" >> entrypoint.sh\n" +
-                            "RUN adduser -s /bin/true -u 1000 -D -h /app app \\ \n" +
-                            "  && chown -R app /app \\ \n" +
-                            "  && chown -R app /app \\ \n" +
-                            "  && chmod 700 /app \\ \n" +
-                            "  && chown -R app /app/app.jar \\ \n" +
-                            "  && chmod 700 /app/app.jar \\ \n" +
-                            "  && chmod 755 entrypoint.sh\n" +
-                            "USER app\n" +
-                            "ENV DB_DRIVER=com.microsoft.sqlserver.jdbc.SQLServerDriver\n" +
-                            "ENV DB_URL=jdbc:sqlserver://127.0.0.1;databaseName=DATA_DEV\n" +
-                            "ENV DB_USER_NAME=${USER_DB}\n" +
-                            "ENV DB_PASSWORD=${PASS_DB}\n" +
-                            "ENV VALID_LICENSE=${env.TOKEN_APP}\n" +
-                            "RUN cat entrypoint.sh\n" +
-                            "EXPOSE 8080 8789\n" +
-                            "CMD /bin/sh ./entrypoint.sh\n" +
-                            "EOF"
+                            dir("${env.PROJECTNAME}/") {
+                                sh "pwd"
+                                sh "ls -la "
+                                sh "sed -i \"s/^GRAPHQL_SPQR_GUI_ENABLED=.*/GRAPHQL_SPQR_GUI_ENABLED=true/\" \".env\""
+                                sh "sed -i \"s/^SWAGGER_UI=.*/SWAGGER_UI=true/\" \".env\""
+                                sh "sed -i \"s/^DB_USER_NAME=.*/DB_USER_NAME=${USER_DB}/\" \".env\""
+                                sh "sed -i \"s/^DB_PASSWORD=.*/DB_PASSWORD=${PASS_DB}/\" \".env\""
+                                sh "sed -i \"s|^VALID_LICENSE=.*|VALID_LICENSE='${env.TOKEN_APP}'|\" .env"
+                                sh "sed -i '0,/- \"8080:/{s/- \"8080:/- \"${env.DOCKER_PORT}:/}' docker-compose.yml"
+                            }
                         }
                     }
                 }
@@ -99,14 +63,21 @@ pipeline {
         }
         stage('Docker Build') {
             steps {
-                sh "ls -l"
-                sh "docker build --tag=${env.PROJECTNAME} . "
-                sh "rm -rf * "
+                dir("${env.PROJECTNAME}/") {
+                    sh "ls -l"
+                    sh "chmod 755 dockerBuild.sh "
+                    sh "./dockerBuild.sh "
+                }
             }
         }
         stage('Docker run') {
             steps {
-                sh "docker run -d -p 8087:8080 --name ${env.PROJECTNAME} ${env.PROJECTNAME} "
+                dir("${env.PROJECTNAME}/") {
+                    sh "ls -l"
+                    sh "echo \"------ Docker run -------- \" "
+                    sh "chmod 755 runDocker.sh "
+                    sh "./runDocker.sh "
+                }
             }
         }
     }

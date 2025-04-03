@@ -3,19 +3,42 @@ services:
     image: lorenzolince/generate-service-deploy
     container_name: generate-service-deploy
     hostname: generate-service-deploy
+    user: "app:app"                 
     restart: always
     ports:
      - "${PORT_TEST_SOA}:${PORT_TEST_SOA}"
      - "${PORT_TEST_REST}:${PORT_TEST_REST}"
      - "${PORT_TEST_GRAPHQL}:${PORT_TEST_GRAPHQL}"
+     - "${PORT_TEST_WS}:${PORT_TEST_WS}"
+     - "${PORT_TEST_RPC}:${PORT_TEST_RPC}"
     volumes:
     - /app/service
+   # - ./templates:/app/deploy/templates:rw
+   # - ./input:/app/deploy/input:rw
     environment:
     - DOMAIN_SERVICE=${LOCAL_IP}
     - PORT_TEST_SOA=${PORT_TEST_SOA}
     - PORT_TEST_REST=${PORT_TEST_REST}
     - PORT_TEST_GRAPHQL=${PORT_TEST_GRAPHQL}
+    - PORT_TEST_WS=${PORT_TEST_WS}
+    - PORT_TEST_RPC=${PORT_TEST_RPC}
     - API_ENDPOINT=http://generate-service-rest:${PORT_API_REST}
+   # - PDF_TEMPLATE_PATH=/app/deploy/templates
+   # - PDF_SIGN_PFX=
+   # - PDF_SIGN_CERT=
+   # - SWAGGER_UI=true
+   # - SFTP_KEY=
+   # - SFTP_USERNAME=internal
+   # - LOCAL_PATH=/app/deploy/templates
+   # - FILE_DIRECTORY_INPUT=input/
+   # - SMB_HOST=
+   # - SMB_PORT=445
+   # - SMB_DOMAIN=WORKGROUP
+   # - SMB_USER=
+   # - SMB_PASSWORD=
+   # - SMB_SHARE_NAME_BASE=share
+    #extra_hosts:
+    #- sftp.server.test:192.168               
   generate-service-rest:
     image: lorenzolince/generate-service-rest
     container_name: generate-service-rest

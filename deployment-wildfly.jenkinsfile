@@ -4,16 +4,14 @@ pipeline {
         string(name: 'projectName', defaultValue: '', description: 'project name')
         string(name: 'project', defaultValue: '', description: 'project contest')
         string(name: 'URL_RECEPTION', defaultValue: '', description: 'URL_RECEPTION')
-        string(name: 'DATABASE', defaultValue: '', description: 'DATABASE')
     }
     environment {
         PROJECTNAME = "${params.projectName}"
             PROJECT = "${params.project}"
-            VOUMENPATH = "${home}/jenkins_home/workspace/deployment-wildfly"
+            VOUMENPATH = "/home/lorenzolince/docker/jenkins/jenkins_home/workspace/deployment-wildfly"
             URL_RECEPTION = "${params.URL_RECEPTION}"
             WILDFLY_HOST = "127.0.0.1"
             WILDFLY_PORT = "9990"
-            DATABASE = "${params.DATABASE}"
             TOKEN_APP = "MIIBI"
     }
 
@@ -23,70 +21,72 @@ pipeline {
                 echo "PROJECT:  ${env.PROJECTNAME}"
                 echo "URL_RECEPTION:  ${env.URL_RECEPTION}"
                 sh "rm -rf *"
-                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'DATABASE=${env.DATABASE}' -e 'TOKEN_APP=${env.TOKEN_APP}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
+                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'TOKEN_APP=${env.TOKEN_APP}' -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
             }
         }
         stage("Construct pom") {
             steps {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'wildfly-credentials', usernameVariable: 'USER_SERVER', passwordVariable: 'PASS_SERVER']]) {
-                    sh "cat > pom.xml << EOF\n" +
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                    "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
-                    "    <modelVersion>4.0.0</modelVersion>\n" +
-                    "    <groupId>com.test.app</groupId>\n" +
-                    "    <artifactId>${env.PROJECTNAME}</artifactId>\n" +
-                    "    <version>0.0.1-SNAPSHOT</version>\n" +
-                    "    <packaging>war</packaging>\n" +
-                    "    <parent>\n" +
-                    "        <groupId>org.springframework.boot</groupId>\n" +
-                    "        <artifactId>spring-boot-starter-parent</artifactId>\n" +
-                    "        <version>2.7.18</version>\n" +
-                    "        <relativePath/> \n" +
-                    "    </parent>\n" +
-                    "    <properties>\n" +
-                    "		 <maven.build.skip>true</maven.build.skip>\n" +
-                    "    </properties>\n" +
-                    "    <build>\n" +
-                    "        <finalName>\\\${project.name}</finalName>\n" +
-                    "        <plugins>\n" +
-                    "            <plugin>\n" +
-                    "                <artifactId>maven-war-plugin</artifactId>\n" +
-                    "                <configuration>\n" +
-                    "                   <skip>true</skip>\n" +
-                    "                </configuration>\n" +
-                    "            </plugin> \n" +
-                    "            <plugin>\n" +
-                    "                <groupId>org.wildfly.plugins</groupId>\n" +
-                    "                <artifactId>wildfly-maven-plugin</artifactId>\n" +
-                    "                <version>5.0.1.Final</version>\n" +
-                    "                <configuration>\n" +
-                    "                    <hostname>${env.WILDFLY_HOST}</hostname>\n" +
-                    "                    <port>${env.WILDFLY_PORT}</port>\n" +
-                    "                    <username>${USER_SERVER}</username>\n" +
-                    "                    <password>${PASS_SERVER}</password>\n" +
-                    "                    <filename>\\\${project.name}.war</filename>\n" +
-                    "                </configuration>\n" +
-                    "                <executions>\n" +
-                    "                    <execution>\n" +
-                    "                        <goals>\n" +
-                    "                            <goal>deploy</goal>\n" +
-                    "                        </goals>\n" +
-                    "                    </execution>\n" +
-                    "                </executions>\n" +
-                    "            </plugin>\n" +
-                    "        </plugins>\n" +
-                    "    </build>\n" +
-                    "</project>\n"
+                    dir("${env.PROJECTNAME}/") {
+                        sh "cat > pom.xml << EOF\n" +
+                        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                        "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
+                        "    <modelVersion>4.0.0</modelVersion>\n" +
+                        "    <groupId>com.test.app</groupId>\n" +
+                        "    <artifactId>${env.PROJECTNAME}</artifactId>\n" +
+                        "    <version>0.0.1-SNAPSHOT</version>\n" +
+                        "    <packaging>war</packaging>\n" +
+                        "    <parent>\n" +
+                        "        <groupId>org.springframework.boot</groupId>\n" +
+                        "        <artifactId>spring-boot-starter-parent</artifactId>\n" +
+                        "        <version>2.7.18</version>\n" +
+                        "        <relativePath/> \n" +
+                        "    </parent>\n" +
+                        "    <properties>\n" +
+                        "		 <maven.build.skip>true</maven.build.skip>\n" +
+                        "    </properties>\n" +
+                        "    <build>\n" +
+                        "        <finalName>\\\${project.name}</finalName>\n" +
+                        "        <plugins>\n" +
+                        "            <plugin>\n" +
+                        "                <artifactId>maven-war-plugin</artifactId>\n" +
+                        "                <configuration>\n" +
+                        "                   <skip>true</skip>\n" +
+                        "                </configuration>\n" +
+                        "            </plugin> \n" +
+                        "            <plugin>\n" +
+                        "                <groupId>org.wildfly.plugins</groupId>\n" +
+                        "                <artifactId>wildfly-maven-plugin</artifactId>\n" +
+                        "                <version>5.0.1.Final</version>\n" +
+                        "                <configuration>\n" +
+                        "                    <hostname>${env.WILDFLY_HOST}</hostname>\n" +
+                        "                    <port>${env.WILDFLY_PORT}</port>\n" +
+                        "                    <username>${USER_SERVER}</username>\n" +
+                        "                    <password>${PASS_SERVER}</password>\n" +
+                        "                    <filename>\\\${project.name}.war</filename>\n" +
+                        "                </configuration>\n" +
+                        "                <executions>\n" +
+                        "                    <execution>\n" +
+                        "                        <goals>\n" +
+                        "                            <goal>deploy</goal>\n" +
+                        "                        </goals>\n" +
+                        "                    </execution>\n" +
+                        "                </executions>\n" +
+                        "            </plugin>\n" +
+                        "        </plugins>\n" +
+                        "    </build>\n" +
+                        "</project>\n"
+                    }
                 }
-                sh "mkdir target"
-                sh "mv ${env.PROJECTNAME}.war target/"
             }
         }
         stage("Deploy Wildfly") {
             steps {
-                sh "mvn wildfly:deploy"
-                sh "rm -rf *"
+                dir("${env.PROJECTNAME}/") {
+                    sh "mvn wildfly:deploy"
+                    sh "rm -rf *"
+                }
             }
         }
     }

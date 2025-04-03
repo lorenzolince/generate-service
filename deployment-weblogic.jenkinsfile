@@ -4,17 +4,15 @@ pipeline {
         string(name: 'projectName', defaultValue: '', description: 'project name')
         string(name: 'project', defaultValue: '', description: 'project contest')
         string(name: 'URL_RECEPTION', defaultValue: '1', description: 'URL_RECEPTION')
-        string(name: 'DATABASE', defaultValue: '', description: 'DATABASE')
     }
     environment {
         PROJECTNAME = "${params.projectName}"
             PROJECT = "${params.project}"
-            VOUMENPATH = "${home}/jenkins_home/workspace/deployment-weblogic"
+            VOUMENPATH = "${home/jenkins/jenkins_home/workspace/deployment-weblogic"
             URL_RECEPTION = "${params.URL_RECEPTION}"
-            WEBLOGIC_HOST = "127.0.0.1"
+            WEBLOGIC_HOST = "27.0.0.1"
             WEBLOGIC_PORT = "7001"
-            DATABASE = "${params.DATABASE}"
-            TOKEN_APP = "MIIB"
+            TOKEN_APP = "MIIBI"
     }
 
     stages {
@@ -23,12 +21,13 @@ pipeline {
                 echo "PROJECT:  ${env.PROJECTNAME}"
                 echo "URL_RECEPTION:  ${env.URL_RECEPTION}"
                 sh "rm -rf *"
-                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'DATABASE=${env.DATABASE}' -e 'TOKEN_APP=${env.TOKEN_APP}'  -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
+                sh "docker run --rm -v ${env.VOUMENPATH}:/app/data -e 'API_ENDPOINT_RECEPTION=${env.URL_RECEPTION}' -e 'TOKEN_APP=${env.TOKEN_APP}'  -e 'PROJECT=${env.PROJECT}' lorenzolince/generate-devops "
             }
         }
         stage("Construct pom") {
             steps {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'weblogic-credentials', usernameVariable: 'USER_SERVER', passwordVariable: 'PASS_SERVER']]) {
+                   dir("${env.PROJECTNAME}/") {
                     sh "cat > pom.xml << EOF\n" +
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
@@ -85,16 +84,17 @@ pipeline {
                     "        </plugins>\n" +
                     "    </build>\n" +
                     "</project>"
-                    sh "mkdir target"
-                    sh "mv ${env.PROJECTNAME}.war target/"
+                   }
                 }
 
             }
         }
         stage("Deploy weblogic") {
             steps {
+                dir("${env.PROJECTNAME}/") {
                 sh "mvn -Dfile.encoding=UTF-8 weblogic:redeploy"
                 sh "rm -rf *"
+                }
             }
         }
     }
