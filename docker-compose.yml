@@ -84,7 +84,7 @@ services:
     - NODE_ENV=test
     - PORT=3000
     - DOMAIN_SERVICE=${LOCAL_IP} 
-    - WEBSOCKET_URL=ws://generate-service-rest:${PORT_NGINX}/backend
+    - WEBSOCKET_URL=ws://${LOCAL_IP}:${PORT_NGINX}/backend
     - API_ENDPOINT=http://generate-service-rest:${PORT_API_REST}
     - PORT_API_REST=${PORT_API_REST}
     links:
