@@ -31,32 +31,24 @@ services:
     - ./templates:/app/deploy/templates:rw
     - ./input:/app/deploy/input:rw
     environment:
-    - PORT_NGINX=${PORT_NGINX}
     - GRAPHQL_SPQR_HTTP_ENDPOINT=graphql
-    - DOMAIN_SERVICE=${LOCAL_IP}
-    - PORT_TEST_SOA=${PORT_TEST_SOA}
-    - PORT_TEST_REST=${PORT_TEST_REST}
-    - PORT_TEST_GRAPHQL=${PORT_TEST_GRAPHQL}
-    - PORT_TEST_WS=${PORT_TEST_WS}
-    - PORT_TEST_RPC=${PORT_TEST_RPC}
-    - API_ENDPOINT=http://generate-service-rest:${PORT_API_REST}
+    - ENDPOINT_SERVICES=${ENDPOINT_SERVICES}
     #- PDF_TEMPLATE_PATH=/app/deploy/templates
-    #- PDF_SIGN_PFX=
-    #- PDF_SIGN_CERT=
+    #- PDF_SIGN_PFX=stringBase64
+    #- PDF_SIGN_CERT=stringBase64
     #- SWAGGER_UI=true
-    #- SFTP_KEY=
-    #- SFTP_USERNAME=admin
+    #- SFTP_KEY=stringBase64
+    #- SFTP_USERNAME=internal
     #- LOCAL_PATH=/app/deploy/templates
     #- FILE_DIRECTORY_INPUT=input/
-    #- SMB_HOST=smb.server.test
+    #- SMB_HOST=192.168.0.
     #- SMB_PORT=445
     #- SMB_DOMAIN=WORKGROUP
-    #- SMB_USER=
-    #- SMB_PASSWORD=
-    #- SMB_SHARE_NAME_BASE=share 
+    #- SMB_USER=lopa
+    #- SMB_PASSWORD=123456
+    #- SMB_SHARE_NAME_BASE=share
     #extra_hosts:
-    #- sftp.server.test:127.0.0.1
-    #- smb.server.test:127.0.0.1
+    #- sftp.server.test:192.168.0.
   generate-service-rest:
     image: lorenzolince/generate-service-rest
     container_name: generate-service-rest
@@ -83,9 +75,6 @@ services:
     environment:
     - NODE_ENV=test
     - PORT=3000
-    - DOMAIN_SERVICE=${LOCAL_IP} 
-    - API_ENDPOINT=http://generate-service-rest:${PORT_API_REST}
-    - PORT_API_REST=${PORT_API_REST}
     links:
      - generate-service-rest
     depends_on:
