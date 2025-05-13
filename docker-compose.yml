@@ -33,6 +33,7 @@ services:
     environment:
     - GRAPHQL_SPQR_HTTP_ENDPOINT=graphql
     - ENDPOINT_SERVICES=${ENDPOINT_SERVICES}
+    - API_JAVA_OPTION=${API_JAVA_OPTION}
     #- PDF_TEMPLATE_PATH=/app/deploy/templates
     #- PDF_SIGN_PFX=stringBase64
     #- PDF_SIGN_CERT=stringBase64
@@ -64,6 +65,7 @@ services:
      - generate-service-deploy 
     environment:
     - URL_REPOSITORY=${URL_REPOSITORY}
+    - API_JAVA_OPTION=${API_JAVA_OPTION}
   generate-service-ui:
     image: lorenzolince/generate-service-ui
     container_name: generate-service-ui
