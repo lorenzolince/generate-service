@@ -1,0 +1,19 @@
+{
+    "title": "Eventos",
+    "titleModal": "Lista de eventos del mes",
+    "nameProject": "Nombre del proyecto",
+    "database": "Origen",
+    "eventName": "Tipo de evento",
+    "typeApi": "Tipo de Api",
+    "applicationContainer": "Tpo de contenedor",
+    "procedureCount": "Cantidad de recursos",
+    "currentDate": "Fecha evento",
+    "procedure": "Recursos",
+    "titleProcedures": "Nombre de los recursos",
+    "totalSrc": "Total recursos en codigo fuente",
+    "totalBinary": "Total recursos en binario",
+    "totalTest": "Total recursos para entorno de pruebas",
+    "totalXsd": "Total recursos en archivos Xsd",
+    "totalDevops": "Total recursos para Devops",
+    "eventDate": "Eventos del mes"
+}

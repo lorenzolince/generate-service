@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.llince.call.sp</groupId>
+  <artifactId>llince-call-sp</artifactId>
+  <versioning>
+    <release>2.0</release>
+    <versions>
+      <version>2.0</version>
+    </versions>
+    <lastUpdated>20240912204434</lastUpdated>
+  </versioning>
+</metadata>

@@ -1,0 +1,31 @@
+{
+    "title": "Generate File ",
+    "name":"Name Projet",
+    "domain":"Domain",
+    "applicationService":"Application Service",
+    "typeDataBase":"Database type",
+    "dataSources":"DataSources",
+    "schema":"choose schema",
+    "procedures":"choose procedure",
+    "type":"Type",
+    "packNme":"Package name",
+    "typeMethod":"Method",
+    "nameMethod":"Name",
+    "Delete":"Delete",
+    "jndi":"Name JNDI",
+    "owner":"Schema",
+    "titleModal":"Choose Stored procedure",
+    "btnGenerate":"Generate Source",
+    "btnGenerateSchena":"Generate Schema",
+    "btntestDeploy":"Test App",
+    "btntestBinary":"generate binary",
+    "btntestDevops":"Continuous Integration",
+    "titleAlertDevops":"Select Continuous Integration",
+    "titleAlertResulset":"Does the Procedure return a Result of any Select or Query?",
+    "textAlertResulset":"Please enter the number of outputs you expect",
+    "auth":"Auth type",
+    "saveFile":"Save file as",
+    "fileInput":"Type Input"
+    
+    
+}

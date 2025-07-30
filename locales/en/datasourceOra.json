@@ -1,0 +1,23 @@
+{
+    "title": "Save Datasource",
+    "titleModal": "Datasource",
+    "name": "Name Datasource",
+    "host": "Host",
+    "port": "Port",
+    "username": "User Name",
+    "password": "Password",
+    "serviceName": "Service Name",
+    "selectShema": "Select the schemes",
+    "Update": "Update",
+    "Delete": "Delete",
+    "btnTest": "Test Connection",
+    "alertTitle": "Test Connection",
+    "alertText": "Connection success",
+    "errorText": "Error Connection",
+    "alertTitleSave": "Save Datasource",
+    "alertTextSave": "Save Datasource success",
+    "alertTitleUpdate": "Update Datasource",
+    "alertTextUpdate": "Update Datasource success",
+    "errorTextSave": "Save Datasource Error",
+    "errorTextUpdate": "Update Datasource Error"
+}

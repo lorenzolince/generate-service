@@ -1,0 +1,23 @@
+{
+    "title": "Guardar Origen de Datos",
+    "titleModal": "Origen de Datos",
+    "name": "Nombre Datasource",
+    "host": "Host",
+    "port": "Puerto",
+    "username": "Nombre Ususario",
+    "password": "Contraseña",
+    "serviceName": "Service Name",
+    "selectShema": "Seleccione los esquemas",
+    "Update": "Actualizar",
+    "Delete": "Eliminar",
+    "btnTest": "Prueba de Conexion",
+    "alertTitle": "Prueba de Conexion",
+    "alertText": "Conexion exitosa",
+    "errorText": "Error de Conexion",
+    "alertTitleSave": "Guardar Datasource",
+    "alertTextSave": "Datasource Guardado exitosamente",
+    "alertTitleUpdate": "Actualizar Datasource",
+    "alertTextUpdate": "Datasource Actualizado  exitosamente",
+    "errorTextSave": "Error al gruardar  Datasource",
+    "errorTextUpdate": "Error al Actualizar Datasource"
+}

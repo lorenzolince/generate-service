@@ -1,0 +1,13 @@
+{
+    "title": "Configuracion de tokens",
+    "titleModal": "Actualizar  tokens",
+    "durationn": "Dias de expiracion",
+    "active": "Activo",
+    "update": "Fecha de Expiracion",
+    "alertTitleSave": "Guardar Tokens",
+    "alertTextSave": "Dependency Guardada  exitosamente",
+    "alertTitleUpdate": "Actualizar tokens",
+    "alertTextUpdate": "Tokens Actualizada  exitosamente",
+    "errorTextSave": "Error al Guardar tokens ",
+    "errorTextUpdate": "Error al Actualizar tokens "
+}

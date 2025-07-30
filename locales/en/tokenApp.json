@@ -1,0 +1,13 @@
+{
+    "title": "Tokens Configurations",
+    "titleModal": "Update tokens",
+    "durationn": "Days to expiration",
+    "active": "Active",
+    "Update": "Update",
+    "alertTitleSave": "Save tokens",
+    "alertTextSave": "Save tokens success",
+    "alertTitleUpdate": "Update tokens",
+    "alertTextUpdate": "Update tokens success",
+    "errorTextSave": "Save tokens Error",
+    "errorTextUpdate": "Update tokens Error"
+}

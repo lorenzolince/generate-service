@@ -1,0 +1,22 @@
+{
+    "title": "Generate Module",
+    "name":"Name Projet",
+    "domain":"Domain",
+    "applicationService":"Application Service",
+    "typeDataBase":"Database type",
+    "dataSources":"DataSources",
+    "schema":"choose schema",
+    "procedures":"choose procedure",
+    "type":"Type",
+    "packNme":"Package name",
+    "typeMethod":"Method",
+    "nameMethod":"Name",
+    "Delete":"Delete",
+    "jndi":"Name JNDI",
+    "owner":"Schema",
+    "titleModal":"Choose Stored procedure",
+    "btnGenerate":"Generate Source",
+    "btntestBinary":"generate binary",
+    "titleAlertResulset":"Does the Procedure return a Result of any Select or Query?",
+    "textAlertResulset":"Please enter the number of outputs you expect"
+}
